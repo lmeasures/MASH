@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CurrentPage } from '../../types';
+import { Pages } from '../../types';
 
 defineProps<{
     currentPage: CurrentPage
@@ -12,10 +13,10 @@ defineEmits<{
 
 <template>
     <transition name="fade">
-      <div id="landing" v-if="currentPage === 'landing'">
+      <div id="landing" v-if="currentPage === Pages.Landing">
         <button 
           id="start-button"
-          v-on:click="$emit('update:currentPage', 'category-selecting')"
+          v-on:click="$emit('update:currentPage', Pages.CategorySelecting)"
         >
           Start
         </button>

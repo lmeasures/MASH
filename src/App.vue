@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, type Ref } from 'vue';
-import type { CharacterBooleanMap, CurrentPage } from './types';
+import type { Category, CharacterBooleanMap, CurrentPage } from './types';
 import Landing from './pages/landing/landing.vue';
+import Categories from './pages/categories/categories.vue';
 
 type TitleState = CharacterBooleanMap<typeof titleCharacters>
 
@@ -17,6 +18,7 @@ const titleState: TitleState = {}
  */
 titleCharacters.split("").forEach(char => titleState[char] = false)
 
+const selectedCategories = ref<Category[]>([])
 
 </script>
 
@@ -41,8 +43,11 @@ titleCharacters.split("").forEach(char => titleState[char] = false)
       @update:currentPage="val => currentPage = val" 
     />
 
-    <div id="category-selecting">
-    </div>
+    <Categories 
+      :currentPage="currentPage" 
+      @update:currentPage="val => currentPage = val" 
+      @update:selectedCategories="val => selectedCategories = val"
+    />
 
     <div id="magic-number-selecting">
     </div>

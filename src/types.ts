@@ -1,9 +1,12 @@
-export type CurrentPage = 
-"landing" | 
-"category-selecting" | 
-"magic-number-selecting" | 
-"selection-summary" | 
-"result";
+export enum Pages {
+  Landing = "landing",
+  CategorySelecting = "category-selecting",
+  MagicNumberSelecting = "magic-number-selecting",
+  SelectionSummary = "selection-summary",
+  Result = "result"
+}
+
+export type CurrentPage = `${Pages}`
 
 /** 
  * Maps a string type to a Key:Value pairing, 
@@ -16,3 +19,10 @@ export type CharacterBooleanMap<T extends string> = {
   [CHAR in T[number]]: boolean
 }
 
+export type Category = {
+  id: number,
+  name: string,
+  values: string[],
+  selected: boolean,
+  isCustom?: boolean
+}
