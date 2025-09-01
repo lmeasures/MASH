@@ -2,11 +2,10 @@
 import { ref } from 'vue';
 import { Pages, type CurrentPage } from '../../types';
 
-//This section is already starting to repeat- need to DRY this
 defineProps<{
     currentPage: CurrentPage
 }>()
-const emit = defineEmits<{
+defineEmits<{
     (e: 'update:currentPage', value: CurrentPage): void,
     (e: 'update:magicNumber', value: number): void
 }>()
