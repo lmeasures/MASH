@@ -27,7 +27,7 @@ const generateMagicNumber = ({start, stop}:{start?:boolean,stop?:boolean}) => {
 <template>
     <transition name="fade">
         <div 
-            id="category-selecting" 
+            id="magic-number-selecting" 
             v-if="currentPage === Pages.MagicNumberSelecting"
         >
             <h2>Generate a Magic Number</h2>
