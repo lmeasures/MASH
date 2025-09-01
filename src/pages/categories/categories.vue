@@ -48,7 +48,10 @@ const handleAddCategory = () => {
 
 <template>
     <transition name="fade">
-        <div id="category-selecting" v-if="currentPage === Pages.CategorySelecting">
+        <div 
+            id="category-selecting" 
+            v-if="currentPage === Pages.CategorySelecting"
+        >
             <h2>Select Categories</h2>
             <div class="category-container" v-for="category in categories">
                 <h3>
@@ -83,6 +86,14 @@ const handleAddCategory = () => {
                 @click="handleAddCategory()"
             >
                 + Add Category
+            </button>
+            <button
+                v-on:click="
+                    $emit('update:selectedCategories', categories),
+                    $emit('update:currentPage', Pages.Landing)
+                "
+            >
+                Back <
             </button>
             <button
                 :disabled="!enoughCategoriesSelected() || !allCategoriesFilled()"

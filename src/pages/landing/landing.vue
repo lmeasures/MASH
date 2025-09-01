@@ -13,10 +13,13 @@ defineEmits<{
 
 <template>
     <transition name="fade">
-      <div id="landing" v-if="currentPage === Pages.Landing">
+      <div
+        id="landing"
+        v-if="currentPage === Pages.Landing"
+      >
         <button 
           id="start-button"
-          v-on:click="$emit('update:currentPage', Pages.CategorySelecting)"
+          @mouseup="$emit('update:currentPage', Pages.CategorySelecting)"
         >
           Start
         </button>
@@ -26,10 +29,19 @@ defineEmits<{
 
 <style scoped>
 
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s ease
+.fade-enter-active{
+  transition: opacity 0.25s 1s ease;
+}
+.fade-leave-active{
+  transition: opacity 0.25s ease;
 }
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
+}
+#start-button{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
 }
 </style>
