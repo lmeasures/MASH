@@ -5,7 +5,7 @@ import { Pages, type CurrentPage } from '../../types';
 defineProps<{
     currentPage: CurrentPage
 }>()
-defineEmits<{
+const emit = defineEmits<{
     (e: 'update:currentPage', value: CurrentPage): void,
     (e: 'update:magicNumber', value: number): void
 }>()
@@ -18,17 +18,17 @@ const generateMagicNumber = ({start, stop}:{start?:boolean,stop?:boolean}) => {
         timeoutId.value = setInterval(()=>{
             magicNumber.value = Math.floor(Math.random() * (9 - 3 + 1)) + 3
         },45)
-    if(stop)
+    if(stop){
         timeoutId && timeoutId.value && clearInterval(timeoutId.value)
+        emit('update:magicNumber', magicNumber.value)
+    }
 }
 
 </script>
 
 <template>
-    <transition name="fade">
         <div 
             id="magic-number-selecting" 
-            v-if="currentPage === Pages.MagicNumberSelecting || currentPage === Pages.SelectionSummary"
         >
             <h2>Magic Number</h2>
             <div class="magic-number-container">
@@ -41,25 +41,7 @@ const generateMagicNumber = ({start, stop}:{start?:boolean,stop?:boolean}) => {
                 >Generate a Magic Number!</button>
             </div>
 
-            <button
-                v-on:click="
-                    $emit('update:magicNumber', magicNumber),
-                    $emit('update:currentPage', Pages.CategorySelecting)
-                "
-            >
-                Back <
-            </button>
-            <button
-                :disabled="magicNumber === 0"
-                v-on:click="
-                    $emit('update:magicNumber', magicNumber),
-                    $emit('update:currentPage', Pages.SelectionSummary)
-                "
-            >
-                > Next
-            </button>
         </div>
-    </transition>
 </template>
 
 <style scoped>

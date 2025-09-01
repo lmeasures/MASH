@@ -1,14 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { defaultCategories } from '../../categories';
-import { Pages, type Category, type CurrentPage } from '../../types';
+import { type Category } from '../../types';
 
 //This section is already starting to repeat- need to DRY this
-defineProps<{
-    currentPage: CurrentPage
-}>()
-defineEmits<{
-    (e: 'update:currentPage', value: CurrentPage): void,
+const emit = defineEmits<{
     (e: 'update:selectedCategories', value: Category[]): void
 }>()
 
@@ -17,20 +13,9 @@ const categories = ref([...defaultCategories])
 const handleChangeInput = (e: Event, categoryId: number, valueIndex: number) => {
     const categoryIndex = categories.value.findIndex(x => x.id === categoryId)
     categories.value[categoryIndex].values[valueIndex] = (e.target as HTMLInputElement).value
+    emit('update:selectedCategories', categories.value)
 }
 
-const allCategoriesFilled = () => {
-    for (let i in categories.value) {
-        if (categories.value[i].values.length < 3) return false
-        for (let x in categories.value[i].values) {
-            if (categories.value[i].values[x] === "") return false
-        }
-    }
-    return true
-}
-const enoughCategoriesSelected = () => {
-    return categories.value.filter(x => x.selected).length >= 4
-}
 
 const handleAddCategory = () => {
     const newCategory = {
@@ -47,10 +32,8 @@ const handleAddCategory = () => {
 </script>
 
 <template>
-    <transition name="fade">
         <div 
             id="category-selecting" 
-            v-if="currentPage === Pages.CategorySelecting || currentPage === Pages.SelectionSummary"
         >
             <h2>Categories</h2>
             <div class="category-container" v-for="category in categories">
@@ -87,25 +70,7 @@ const handleAddCategory = () => {
             >
                 + Add Category
             </button>
-            <button
-                v-on:click="
-                    $emit('update:selectedCategories', categories),
-                    $emit('update:currentPage', Pages.Landing)
-                "
-            >
-                Back <
-            </button>
-            <button
-                :disabled="!enoughCategoriesSelected() || !allCategoriesFilled()"
-                v-on:click="
-                    $emit('update:selectedCategories', categories),
-                    $emit('update:currentPage', Pages.MagicNumberSelecting)
-                "
-            >
-                > Next
-            </button>
         </div>
-    </transition>
 </template>
 
 <style scoped>
