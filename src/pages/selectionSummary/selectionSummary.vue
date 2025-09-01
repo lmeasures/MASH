@@ -27,19 +27,11 @@ const generateMagicNumber = ({start, stop}:{start?:boolean,stop?:boolean}) => {
 <template>
     <transition name="fade">
         <div 
-            id="magic-number-selecting" 
-            v-if="currentPage === Pages.MagicNumberSelecting || currentPage === Pages.SelectionSummary"
+            id="selection-summary" 
+            v-if="currentPage === Pages.SelectionSummary"
         >
-            <h2>Magic Number</h2>
-            <div class="magic-number-container">
-                <label for="magic-number-value" v-if="currentPage === Pages.SelectionSummary">Magic Number</label>
-                <input id="magic-number-value" disabled :value="magicNumber"/>
-                <button 
-                    v-if="currentPage !== Pages.SelectionSummary"
-                    @mousedown="generateMagicNumber({start:true})"
-                    @mouseup="generateMagicNumber({stop:true})"
-                >Generate a Magic Number!</button>
-            </div>
+            <h2>Your selections</h2>
+            
 
             <button
                 v-on:click="

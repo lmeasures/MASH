@@ -50,9 +50,9 @@ const handleAddCategory = () => {
     <transition name="fade">
         <div 
             id="category-selecting" 
-            v-if="currentPage === Pages.CategorySelecting"
+            v-if="currentPage === Pages.CategorySelecting || currentPage === Pages.SelectionSummary"
         >
-            <h2>Select Categories</h2>
+            <h2>Categories</h2>
             <div class="category-container" v-for="category in categories">
                 <h3>
                     <input 
