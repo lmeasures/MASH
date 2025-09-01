@@ -3,6 +3,7 @@ import { ref, type Ref } from 'vue';
 import type { Category, CharacterBooleanMap, CurrentPage } from './types';
 import Landing from './pages/landing/landing.vue';
 import Categories from './pages/categories/categories.vue';
+import MagicNumber from './pages/magicNumber/magicNumber.vue';
 
 type TitleState = CharacterBooleanMap<typeof titleCharacters>
 
@@ -19,6 +20,7 @@ const titleState: TitleState = {}
 titleCharacters.split("").forEach(char => titleState[char] = false)
 
 const selectedCategories = ref<Category[]>([])
+const magicNumber = ref<number>(0)
 
 </script>
 
@@ -49,8 +51,11 @@ const selectedCategories = ref<Category[]>([])
       @update:selectedCategories="val => selectedCategories = val"
     />
 
-    <div id="magic-number-selecting">
-    </div>
+    <MagicNumber
+      :currentPage="currentPage"
+      @update:currentPage="val => currentPage = val"
+      @update:magicNumber="val => magicNumber = val"
+    />
 
     <div id="selection-summary">
     </div>
