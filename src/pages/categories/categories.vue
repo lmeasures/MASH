@@ -12,7 +12,7 @@ const categories = ref([...defaultCategories])
 
 const handleChangeInput = (e: Event, categoryId: number, valueIndex: number) => {
     const categoryIndex = categories.value.findIndex(x => x.id === categoryId)
-    categories.value[categoryIndex].values[valueIndex] = (e.target as HTMLInputElement).value
+    categories.value[categoryIndex].values[valueIndex] = {name: (e.target as HTMLInputElement).value, struck: false}
     emit('update:selectedCategories', categories.value)
 }
 
@@ -52,16 +52,25 @@ const handleAddCategory = () => {
                     />
                 </h3>
                 <ul :id="`${category.name}-values`" class="category-values">
-                    <li v-for="value, index in category.values" :key="value">
-                        <input 
-                            type="text" 
-                            :value="value"
-                            @change="e => handleChangeInput(e, category.id, index)"
-                        />
+                    <li v-for="value, index in category.values" :key="value.name">
+                        <template 
+                            v-if="!value.struck"
+                        >
+                            <input 
+                                type="text" 
+                                :value="value.name"
+                                @change="e => handleChangeInput(e, category.id, index)"
+                            />
+                        </template>
+                        <template 
+                            v-if="value.struck"
+                        >
+                            <s>{{ value.name }}</s>
+                        </template>
                     </li>
                     <button 
                         v-if="category.values.length < 4"
-                        @click="category.values.push('')"
+                        @click="category.values.push({name: '', struck: false})"
                     >+</button>
                 </ul>
             </div>

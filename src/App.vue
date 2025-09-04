@@ -12,31 +12,48 @@ const pages: CurrentPage[] = [Pages.Landing, Pages.CategorySelecting, Pages.Magi
 
 const titleCharacters = "MASH"
 
+
+const titleCharMeaning = (character: string) => {
+  switch (character) {
+            case "M":
+              return "Mansion"
+            case "A":
+              return "Apartment"
+            case "S":
+              return "Shack"
+            case "H":
+              return "House"
+            default:
+              break;
+  }  
+}
+
 /** Instantiate a blank TitleState object */
-const titleState: TitleState = {}
+const titleState = ref<TitleState>({})
 /** 
  * Loop through the characters in titleCharacters, 
  * applying a 'default' false value to each character 
  */
-titleCharacters.split("").forEach(char => titleState[char] = false)
+titleCharacters.split("").forEach(char => titleState.value[char] = false)
 
 const selectedCategories = ref<Category[]>([])
 const magicNumber = ref<number>(0)
+const finalState = ref<{option: string, category: string, struck: boolean}[]>([])
 
 // replace this with a ref object. Make the returned value an object.
 // Make the current "option" part the key, and 'category' & 'struck' the value 
 // then utilise this in the algorithm runner to make your life easier and avoid that spaghettified nonsense you've been writing.
 const allTheOptionsAsAnArray = () => {
   const options = [
-    {option: "M", category: "title", struck: titleState.M},
-    {option: "A", category: "title", struck: titleState.A},
-    {option: "S", category: "title", struck: titleState.S},
-    {option: "H", category: "title", struck: titleState.H}
+    {option: "M", category: "title", struck: false},
+    {option: "A", category: "title", struck: false},
+    {option: "S", category: "title", struck: false},
+    {option: "H", category: "title", struck: false}
   ]
-  selectedCategories.value.forEach((category) => {
+  selectedCategories.value.filter(x => x.selected).forEach((category) => {
     category.values.forEach((value) => {
       options.push({
-        option: value, category: category.name, struck: false
+        option: value.name, category: category.name, struck: false
       })
     })
   })
@@ -44,33 +61,55 @@ const allTheOptionsAsAnArray = () => {
 }
 
 // it's real late, and I can't think of an appropriate name for this function
-const allDone = () => {
-  const allTheThings = allTheOptionsAsAnArray()
-  const allTheCategories = new Set(allTheThings.map((x)=>x.category))
+const allDone = (allTheThings: {option: string, category: string, struck: boolean}[]) => {
+  const allTheCategories = Array.from(new Set(allTheThings.map((x)=>x.category)))
+  for (const category in allTheCategories) {
+    const unstruckItemsInCategory = allTheThings.filter((x) => x.category === allTheCategories[category] && !x.struck)
 
-  for (let category in allTheCategories) {
     if (
-      allTheThings
-      .filter((x) => x.category === category && !x.struck)
-      .length !== 1
+      unstruckItemsInCategory.length > 1
     ) return false
   }
+  return true
 }
 
-const findNextUnstruck = (lastIndexStruck: number) => {
-  const allTheThings = allTheOptionsAsAnArray()
-  const nextUnstruckItem = allTheThings.filter((x) => !x.struck)[lastIndexStruck + magicNumber.value]
-  return allTheThings.indexOf(nextUnstruckItem)
+const findNextUnstruck = (lastIndexStruck: number, allTheThings: {option: string, category: string, struck: boolean}[]) => {
+  // Count unstruck items per category
+  const unstruckByCategory: Record<string, number> = {}
+  for (const item of allTheThings) {
+    if (!item.struck) {
+      unstruckByCategory[item.category] = (unstruckByCategory[item.category] || 0) + 1
+    }
+  }
+
+  // Build the list of "eligible" items (categories with > 1 survivor)
+  const eligibleItems = allTheThings.filter(
+    x => !x.struck && unstruckByCategory[x.category] > 1
+  )
+
+  if (eligibleItems.length === 0) {
+    return -1 // nothing left to strike
+  }
+
+  // Advance `magicNumber` steps
+  const nextIndex = (lastIndexStruck + magicNumber.value) % eligibleItems.length
+
+  const nextUnstruckItem = eligibleItems[nextIndex]
+
+
+  // Return its index in the full array so algo can update source-of-truth
+  return allTheThings.findIndex(
+    x => x.option === nextUnstruckItem.option && x.category === nextUnstruckItem.category
+  )
 }
 
 
-const titleOptions = allTheOptionsAsAnArray().filter((x) => { return ["M","A","S","H"].includes(x.option)} )
 
 const allCategoriesFilled = () => {
     for (let i in selectedCategories.value) {
         if (selectedCategories.value[i].values.length < 3) return false
         for (let x in selectedCategories.value[i].values) {
-            if (selectedCategories.value[i].values[x] === "") return false
+            if (selectedCategories.value[i].values[x].name === "") return false
         }
     }
     return true
@@ -92,34 +131,52 @@ const disableNext = () => {
   }
 }
 
-const runMASHAlgorithm = () => {
+const runMASHAlgorithm = async () => {
   let lastIndexStruck = 0
-  while (allDone() === false) {
-    const allTheThings = allTheOptionsAsAnArray()
-    const nextUnstruckIndex = findNextUnstruck(lastIndexStruck)
-    // this will only work for one loop of the array atm. Need to enable it to loop back around to the beginning
-    if (allTheThings[nextUnstruckIndex].category === "title") {
-      titleState[allTheThings[nextUnstruckIndex].option] = true
-    } else {
-      const indexOfCategoryContainingOptionToBeStruck = selectedCategories.value.findIndex((x) => x.name === allTheThings[nextUnstruckIndex].category)
-      const indexOfOptionInCategoryToBeStruck = selectedCategories.value[indexOfCategoryContainingOptionToBeStruck].values.findIndex((x) => x === allTheThings[nextUnstruckIndex].option)
-      selectedCategories.value[indexOfCategoryContainingOptionToBeStruck]
-        .values[indexOfOptionInCategoryToBeStruck] = 
+  let delay = 1000
+  const minDelay = 150
+  const delayStep = 150
 
-      selectedCategories.value[
-        selectedCategories.value.findIndex((x) => x.name === allTheThings[nextUnstruckIndex].category)
-      ].values = {
-        ...selectedCategories
-        .value[
-          selectedCategories.value.findIndex(
-            (x) => x.name === allTheThings[nextUnstruckIndex].category
-          )].values.find((x) => x !== allTheThings[nextUnstruckIndex].option),
-        struck:true
-      }
+  const allTheThings = allTheOptionsAsAnArray()
+
+
+  while (!allDone(allTheThings)) {
+
+    await new Promise(resolve => setTimeout(resolve, delay))
+
+    const nextUnstruckIndex = findNextUnstruck(lastIndexStruck, allTheThings)
+
+
+    const valueToStrike = allTheThings[nextUnstruckIndex]
+
+
+    if (valueToStrike.category === "title") {
+
+      // updating the ref object allows vue to display the changes as per req.
+      titleState.value[valueToStrike.option] = true
+      // aaand then we have to update the array we're looping through to ensure
+      //  the algo works correctly
+      allTheThings[nextUnstruckIndex].struck = true
+    } else {
+
+      const refCategory = selectedCategories.value.findIndex((x) => x.name === valueToStrike.category)
+
+      const categoryValue = allTheThings.findIndex(value => value.option === valueToStrike.option)
+      const refCategoryValue = selectedCategories.value[refCategory].values.findIndex(value => value.name === valueToStrike.option)
+      allTheThings[categoryValue].struck = true
+      selectedCategories.value[refCategory].values[refCategoryValue].struck = true
+
     }
+
     lastIndexStruck = nextUnstruckIndex
+
+    delay = (delay - delayStep) < minDelay ? minDelay : delay - delayStep
   }
-  
+  finalState.value = allTheThings.filter(x => !x.struck)
+  await new Promise(resolve => setTimeout(()=>{
+    currentPage.value = Pages.Result
+    resolve(true)
+  }, 1500))
 }
 
 </script>
@@ -133,10 +190,10 @@ const runMASHAlgorithm = () => {
     >
       <component 
         class="mash-title-char"
-        v-for="(char) in titleOptions"
-        :is="allTheOptionsAsAnArray().find((x) => x.option === char.option)?.struck ? 's' : 'span'"
+        v-for="(character) in Object.keys(titleState)"
+        :is="titleState[character] ? 's' : 'span'"
       >
-        {{ char.option }}
+        {{ character }}
       </component>
     </div>
 
@@ -196,7 +253,19 @@ const runMASHAlgorithm = () => {
     </transition>
 
     <transition name="fade">
-      <div id="result">
+      <div id="result" v-if="currentPage === Pages.Result">
+        <span>You will live in a </span>
+        <span v-for="char in finalState.filter(x => x.category === 'title')">
+          {{ titleCharMeaning(char.option) }}
+        </span>
+        <span>, with: <br/></span>
+        <span
+          v-for="result, i in finalState.filter(x => x.category !== 'title')"
+        >
+          <span>{{ result.category }}: {{ result.option }}</span>  
+          <span v-if="i < finalState.length - 3">, <br/></span>
+          <span v-if="i === finalState.length - 3"><br/>and </span>
+        </span>
       </div>
     </transition>
 
@@ -228,7 +297,7 @@ const runMASHAlgorithm = () => {
     left: 50%;
   }
   &.position-result {
-    top:45%;
+    top:20%;
   }
 }
 

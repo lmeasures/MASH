@@ -22,7 +22,7 @@ export type CharacterBooleanMap<T extends string> = {
 export type Category = {
   id: number,
   name: string,
-  values: string[],
+  values: {name: string, struck: boolean}[],
   selected: boolean,
   isCustom?: boolean
 }
