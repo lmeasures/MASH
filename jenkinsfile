@@ -1,7 +1,7 @@
 pipeline {
     agent {
         // Reference a kubernetes pod template label
-        label ''
+        label 'node'
         // Use inline kubernetes agent 
         // kubernetes { ... }
     }
