@@ -1,0 +1,15 @@
+pipeline {
+    agent {
+        // Reference a kubernetes pod template label
+        label ''
+        // Use inline kubernetes agent 
+        // kubernetes { ... }
+    }
+    stages {
+        stage('build') {
+            steps {
+                sh 'npm run dev'
+           }
+        }
+    }
+}
